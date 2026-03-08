@@ -1,0 +1,8 @@
+{
+  "lr_number": "LR1023",
+  "customer": "ABC Electronics",
+  "quantity": 12,
+  "freight": 6500,
+  "fuel_surcharge": 400,
+  "total": 6900
+}

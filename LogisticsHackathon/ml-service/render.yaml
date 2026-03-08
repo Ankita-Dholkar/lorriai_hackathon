@@ -1,0 +1,38 @@
+services:
+  # Agent 1: OCR Service (Flask)
+  - type: web
+    name: logistics-ocr-agent
+    env: python
+    region: singapore # Change to your preferred region (e.g., ohio, frankfurt)
+    buildCommand: "cd logistics_project && pip install -r requirements.txt"
+    startCommand: "cd logistics_project && gunicorn app:app --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0 # Match your local python version
+    # Note: For Tesseract OCR, you might need a Dockerfile deployment on Render 
+    # as the native python environment doesn't have tesseract-ocr installed by default.
+    # If it fails, we will need to create a Dockerfile for Agent 1.
+
+  # Agent 2: Delivery Verification (FastAPI)
+  - type: web
+    name: logistics-delivery-agent
+    env: python
+    region: singapore
+    buildCommand: "cd agent2_delivery_verification && pip install -r requirements.txt"
+    # FastAPI uses uvicorn for production
+    startCommand: "cd agent2_delivery_verification && uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+
+  # Agent 3: Fraud/Analytics (Flask)
+  - type: web
+    name: logistics-fraud-agent
+    env: python
+    region: singapore
+    buildCommand: "cd 'agent 3' && pip install -r requirements.txt"
+    # 'src/server.py' contains 'app = Flask(__name__)'
+    startCommand: "cd 'agent 3' && gunicorn src.server:app --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0

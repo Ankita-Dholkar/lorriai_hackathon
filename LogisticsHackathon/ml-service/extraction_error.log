@@ -1,0 +1,84 @@
+
+--- ERROR at 2d37edd9-0849-4273-ba8e-dfe54f1c4363 ---
+Traceback (most recent call last):
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\app.py", line 79, in extract_receipt
+    lr_number = insert_data(file.filename, data, transport, raw_text)
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 108, in insert_data
+    raise e
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 103, in insert_data
+    cursor.execute(query, values)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: table lorry_receipts has no column named transporter_name
+
+
+--- ERROR at 15e2235a-ddb2-4a09-88ee-10af4d2bde37 ---
+Traceback (most recent call last):
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\app.py", line 79, in extract_receipt
+    lr_number = insert_data(file.filename, data, transport, raw_text)
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 108, in insert_data
+    raise e
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 103, in insert_data
+    cursor.execute(query, values)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: lorry_receipts.lr_number
+
+
+--- ERROR at 0526f682-2863-436a-adae-13ae806a61c1 ---
+Traceback (most recent call last):
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\app.py", line 79, in extract_receipt
+    lr_number = insert_data(file.filename, data, transport, raw_text)
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 108, in insert_data
+    raise e
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 103, in insert_data
+    cursor.execute(query, values)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: lorry_receipts.lr_number
+
+
+--- ERROR at 72ea45f4-0843-4df5-858b-01dd555a1630 ---
+Traceback (most recent call last):
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\app.py", line 79, in extract_receipt
+    lr_number = insert_data(file.filename, data, transport, raw_text)
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 108, in insert_data
+    raise e
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 103, in insert_data
+    cursor.execute(query, values)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: lorry_receipts.lr_number
+
+
+--- ERROR at 18cfaa8e-609c-4f82-8626-9df8e0466b7e ---
+Traceback (most recent call last):
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\app.py", line 79, in extract_receipt
+    lr_number = insert_data(file.filename, data, transport, raw_text)
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 108, in insert_data
+    raise e
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 103, in insert_data
+    cursor.execute(query, values)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: lorry_receipts.lr_number
+
+
+--- ERROR at b25e0670-87c8-46b8-af33-9f5bcd8e16ec ---
+Traceback (most recent call last):
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\app.py", line 79, in extract_receipt
+    lr_number = insert_data(file.filename, data, transport, raw_text)
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 108, in insert_data
+    raise e
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 103, in insert_data
+    cursor.execute(query, values)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: lorry_receipts.lr_number
+
+
+--- ERROR at 71424c05-0cfe-45e7-a6d6-5386eb6150c0 ---
+Traceback (most recent call last):
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\app.py", line 79, in extract_receipt
+    lr_number = insert_data(file.filename, data, transport, raw_text)
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 108, in insert_data
+    raise e
+  File "D:\Web Development\WEB PROJECTS\LogisticsHackathon\lorri-ai-hackathon\logistics_project\database\db.py", line 103, in insert_data
+    cursor.execute(query, values)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: lorry_receipts.lr_number
+
