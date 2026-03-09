@@ -20,6 +20,17 @@ const allowedOrigins = [
     "https://cargointellogistics-nine.vercel.app"
 ];
 
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.includes(origin)) {
+        res.header("Access-Control-Allow-Origin", origin);
+        res.header("Access-Control-Allow-Credentials", "true");
+    } else {
+        res.header("Access-Control-Allow-Origin", "*");
+    }
+    next();
+});
+
 app.use(cors({
     origin: true,
     credentials: true

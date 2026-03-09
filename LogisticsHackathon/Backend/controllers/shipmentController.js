@@ -156,18 +156,24 @@ export const generateOTP = async (req, res) => {
 
     if (!shipment) {
       console.error(`[OTP DEBUG] Shipment not found: ${req.params.id}`)
-      return res.status(404).json({ message: 'Shipment not found' })
+      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+      res.header("Access-Control-Allow-Credentials", "true");
+      return res.status(404).json({ message: `Shipment ID ${req.params.id} could not be found in the database. Please refresh.` })
     }
 
     // Ensure the user requesting this is the assigned carrier
     if (!shipment.carrierCompany) {
       console.error(`[OTP DEBUG] Shipment ${shipment._id} has no carrierCompany assigned`)
-      return res.status(400).json({ message: 'No carrier assigned to this shipment' })
+      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+      res.header("Access-Control-Allow-Credentials", "true");
+      return res.status(400).json({ message: `Critical error: No carrier is currently assigned to shipment ${shipment.lrNumber || 'Unknown'}.` })
     }
 
     if (shipment.carrierCompany.toString() !== req.user._id.toString()) {
       console.warn(`[OTP DEBUG] Auth mismatch: shipment.carrierCompany(${shipment.carrierCompany}) !== req.user._id(${req.user._id})`)
-      return res.status(403).json({ message: 'Not authorized to deliver this shipment' })
+      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+      res.header("Access-Control-Allow-Credentials", "true");
+      return res.status(403).json({ message: `Unauthorized: This shipment is assigned to a different carrier ID. Your ID: ${req.user._id}` })
     }
 
     // Update consignee contact/email if provided
@@ -186,11 +192,15 @@ export const generateOTP = async (req, res) => {
     let emailToUse = receiverEmail ? receiverEmail.trim() : (shipment.consigneeEmail ? shipment.consigneeEmail.trim() : '');
 
     if (emailToUse.length === 0) {
-      return res.status(400).json({ message: 'Email is required for OTP' })
+      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+      res.header("Access-Control-Allow-Credentials", "true");
+      return res.status(400).json({ message: 'Receiver Email address is missing! Please type it into the email box.' })
     }
 
     if (emailToUse.length < 5 || !emailToUse.includes('@')) {
-      return res.status(400).json({ message: `Incorrect email format: ${emailToUse}` })
+      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+      res.header("Access-Control-Allow-Credentials", "true");
+      return res.status(400).json({ message: `Incorrect email format detected: "${emailToUse}". Please enter a valid email.` })
     }
 
     // Auto-fix common typo if '@' is missing before 'gmail.com'
@@ -247,15 +257,14 @@ export const generateOTP = async (req, res) => {
         }
       } catch (emailError) {
         console.error('Nodemailer Error:', emailError.message)
-        // Add manual headers here too
         res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
         res.header("Access-Control-Allow-Credentials", "true");
-        return res.status(400).json({ message: `Email sending failed: ${emailError.message}` })
+        return res.status(400).json({ message: `Email sending failed via Nodemailer. Reason: ${emailError.message}. Check your .env EMAIL settings.` })
       }
     } else {
       res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
       res.header("Access-Control-Allow-Credentials", "true");
-      return res.status(400).json({ message: 'Consignee email is missing or invalid' })
+      return res.status(400).json({ message: 'Configuration error: Target email address resolution failed. Consignee email is missing or invalid.' })
     }
 
     // Still keep the mock log for SMS if they use both, or just to show we got it
@@ -273,15 +282,7 @@ export const generateOTP = async (req, res) => {
     res.header("Access-Control-Allow-Credentials", "true");
 
     // Send specific message if we already set it
-    const isSpecific = error.message.includes('Email sending failed') || 
-                       error.message.includes('Email is required') || 
-                       error.message.includes('Incorrect email');
-
-    if (isSpecific) {
-      res.status(400).json({ message: error.message })
-    } else {
-      res.status(500).json({ message: `Failed to generate OTP: ${error.message}` })
-    }
+    res.status(500).json({ message: `Severe Server Error during OTP generation: ${error.message}` })
   }
 }
 
@@ -301,11 +302,12 @@ export const verifyDelivery = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to deliver this shipment' })
     }
 
-    // Local verification check
     console.log(`[OTP DEBUG] Verifying Entered OTP: ${otp} against Stored: ${shipment.deliveryOTP}`)
     if (!shipment.deliveryOTP || shipment.deliveryOTP.toString().trim() !== otp.toString().trim()) {
+      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+      res.header("Access-Control-Allow-Credentials", "true");
       return res.status(400).json({
-        message: `Invalid OTP. System received: '${otp}'. Please check and try again.`
+        message: `OTP Verification Failed. System expected a different code. Please resend a new OTP.`
       })
     }
 
