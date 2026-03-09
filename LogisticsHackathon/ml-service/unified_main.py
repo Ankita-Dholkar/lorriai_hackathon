@@ -9,7 +9,7 @@ import sys
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(BASE_DIR, "logistics_project"))
 sys.path.append(os.path.join(BASE_DIR, "agent2_delivery_verification"))
-sys.path.append(os.path.join(BASE_DIR, "agent 3", "src"))
+sys.path.append(os.path.join(BASE_DIR, "agent3", "src"))
 
 # --- Import the applications ---
 # 1. Agent 2 (FastAPI) - Delivery Verification

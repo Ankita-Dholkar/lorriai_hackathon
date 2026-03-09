@@ -10,7 +10,8 @@ from risk_engine import FraudRiskEngine
 from dashboard.graphs import fraud_probability_graph, freight_comparison, risk_reason_graph
 
 # ---------------- DATABASE PATH ----------------
-DB_PATH = "../../database/logistics.db"
+base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DB_PATH = os.path.join(base_dir, "database", "logistics.db")
 
 # ---------------- LOAD LR DATA ----------------
 def load_lr_data(lr_number):

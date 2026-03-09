@@ -6,7 +6,9 @@ import os
 os.makedirs("database", exist_ok=True)
 
 def get_conn():
-    return sqlite3.connect("../database/logistics.db")
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    db_path = os.path.join(base_dir, "database", "logistics.db")
+    return sqlite3.connect(db_path)
 
 def init_db():
     conn = get_conn()
@@ -117,7 +119,9 @@ init_db()
 # ---------------- FETCH LR DETAILS ----------------
 def fetch_lr_details(lr_number):
     # Database se connect karein
-    conn = sqlite3.connect("../database/logistics.db")
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    db_path = os.path.join(base_dir, "database", "logistics.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Query execute karein
@@ -196,7 +200,9 @@ def store_pod(lr_number, delivery_date, delivery_time, otp_verified, gps_verifie
 
 # ---------------- STORE MANUAL CHARGES ----------------
 def store_manual_charges(lr_number, waiting_charges, loading_charges, unloading_charges, detention_charges):
-    conn = sqlite3.connect("../database/logistics.db")
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    db_path = os.path.join(base_dir, "database", "logistics.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -212,7 +218,9 @@ def store_manual_charges(lr_number, waiting_charges, loading_charges, unloading_
 
 # ---------------- DUPLICATE RECEIPT DETECTION ----------------
 def check_and_store_receipt(lr_number, receipt_type, transaction_id, raw_text, amount, date):
-    conn = sqlite3.connect("../database/logistics.db")
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    db_path = os.path.join(base_dir, "database", "logistics.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     receipt_hash = hashlib.md5(raw_text.encode()).hexdigest()
@@ -243,7 +251,9 @@ def check_and_store_receipt(lr_number, receipt_type, transaction_id, raw_text, a
 
 def generate_invoice(lr_number):
 
-    conn = sqlite3.connect("../database/logistics.db")
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    db_path = os.path.join(base_dir, "database", "logistics.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Fuel total
@@ -326,7 +336,9 @@ def generate_invoice(lr_number):
 
 def calculate_carrier_payment(lr_number):
 
-    conn = sqlite3.connect("../database/logistics.db")
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    db_path = os.path.join(base_dir, "database", "logistics.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # -------- Fuel --------

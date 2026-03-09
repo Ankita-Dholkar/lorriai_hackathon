@@ -7,6 +7,11 @@ import traceback
 import pytesseract
 from PIL import Image
 
+if os.name == "nt":  # Windows
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+else:  # Linux (Render)
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+
 app = Flask(__name__)
 CORS(app)
 
