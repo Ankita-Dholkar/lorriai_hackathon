@@ -183,21 +183,21 @@ export const generateOTP = async (req, res) => {
       shipment.consigneeContact = `+91${shipment.consigneeContact.trim()}`
     }
 
-    if (receiverEmail && receiverEmail.trim().length > 0) {
-      if (receiverEmail.length < 5) {
-        return res.status(400).json({ message: 'Incorrect email' })
-      }
-      // Auto-fix common typo if '@' is missing before 'gmail.com'
-      let fixedEmail = receiverEmail.trim()
-      if (!fixedEmail.includes('@') && fixedEmail.toLowerCase().includes('gmail.com')) {
-         fixedEmail = fixedEmail.replace(/gmail\.com/i, '@gmail.com')
-      }
-      shipment.consigneeEmail = fixedEmail
-    } else if (shipment.consigneeEmail && shipment.consigneeEmail.trim().length >= 5) {
-      // Use existing email
-    } else {
+    let emailToUse = receiverEmail ? receiverEmail.trim() : (shipment.consigneeEmail ? shipment.consigneeEmail.trim() : '');
+
+    if (emailToUse.length === 0) {
       return res.status(400).json({ message: 'Email is required for OTP' })
     }
+
+    if (emailToUse.length < 5 || !emailToUse.includes('@')) {
+      return res.status(400).json({ message: `Incorrect email format: ${emailToUse}` })
+    }
+
+    // Auto-fix common typo if '@' is missing before 'gmail.com'
+    if (!emailToUse.includes('@') && emailToUse.toLowerCase().includes('gmail.com')) {
+       emailToUse = emailToUse.replace(/gmail\.com/i, '@gmail.com')
+    }
+    shipment.consigneeEmail = emailToUse
 
     // Generate OTP via Agent 2 (ML Backend)
     if (!shipment.lrNumber) {
@@ -262,7 +262,7 @@ export const generateOTP = async (req, res) => {
         }
       } catch (emailError) {
         console.error('Nodemailer Error:', emailError.message)
-        return res.status(400).json({ message: 'Incorrect email' })
+        return res.status(400).json({ message: `Email sending failed: ${emailError.message}` })
       }
     } else {
       return res.status(400).json({ message: 'Incorrect email' })
@@ -277,8 +277,8 @@ export const generateOTP = async (req, res) => {
   } catch (error) {
     console.error('Generate OTP Error:', error)
     // Send specific message if we already set it
-    if (error.message.includes('Incorrect email')) {
-      res.status(400).json({ message: 'Incorrect email' })
+    if (error.message.includes('Incorrect email') || error.message.includes('Email sending failed')) {
+      res.status(400).json({ message: error.message })
     } else {
       res.status(500).json({ message: 'Failed to generate OTP' })
     }
