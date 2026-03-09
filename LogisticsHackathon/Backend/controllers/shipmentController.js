@@ -6,7 +6,6 @@ import fs from 'fs'
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import uploadOnCloudinary from '../config/cloudinary.js'
-import dns from 'dns'
 
 // @desc    Create a new shipment
 // @route   POST /api/shipments
@@ -157,24 +156,18 @@ export const generateOTP = async (req, res) => {
 
     if (!shipment) {
       console.error(`[OTP DEBUG] Shipment not found: ${req.params.id}`)
-      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-      res.header("Access-Control-Allow-Credentials", "true");
-      return res.status(404).json({ message: `Shipment ID ${req.params.id} could not be found in the database. Please refresh.` })
+      return res.status(404).json({ message: 'Shipment not found' })
     }
 
     // Ensure the user requesting this is the assigned carrier
     if (!shipment.carrierCompany) {
       console.error(`[OTP DEBUG] Shipment ${shipment._id} has no carrierCompany assigned`)
-      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-      res.header("Access-Control-Allow-Credentials", "true");
-      return res.status(400).json({ message: `Critical error: No carrier is currently assigned to shipment ${shipment.lrNumber || 'Unknown'}.` })
+      return res.status(400).json({ message: 'No carrier assigned to this shipment' })
     }
 
     if (shipment.carrierCompany.toString() !== req.user._id.toString()) {
       console.warn(`[OTP DEBUG] Auth mismatch: shipment.carrierCompany(${shipment.carrierCompany}) !== req.user._id(${req.user._id})`)
-      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-      res.header("Access-Control-Allow-Credentials", "true");
-      return res.status(403).json({ message: `Unauthorized: This shipment is assigned to a different carrier ID. Your ID: ${req.user._id}` })
+      return res.status(403).json({ message: 'Not authorized to deliver this shipment' })
     }
 
     // Update consignee contact/email if provided
@@ -193,20 +186,16 @@ export const generateOTP = async (req, res) => {
     let emailToUse = receiverEmail ? receiverEmail.trim() : (shipment.consigneeEmail ? shipment.consigneeEmail.trim() : '');
 
     if (emailToUse.length === 0) {
-      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-      res.header("Access-Control-Allow-Credentials", "true");
-      return res.status(400).json({ message: 'Receiver Email address is missing! Please type it into the email box.' })
+      return res.status(400).json({ message: 'Email is required for OTP' })
     }
 
     if (emailToUse.length < 5 || !emailToUse.includes('@')) {
-      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-      res.header("Access-Control-Allow-Credentials", "true");
-      return res.status(400).json({ message: `Incorrect email format detected: "${emailToUse}". Please enter a valid email.` })
+      return res.status(400).json({ message: `Incorrect email format: ${emailToUse}` })
     }
 
     // Auto-fix common typo if '@' is missing before 'gmail.com'
     if (!emailToUse.includes('@') && emailToUse.toLowerCase().includes('gmail.com')) {
-      emailToUse = emailToUse.replace(/gmail\.com/i, '@gmail.com')
+       emailToUse = emailToUse.replace(/gmail\.com/i, '@gmail.com')
     }
     shipment.consigneeEmail = emailToUse
 
@@ -229,20 +218,12 @@ export const generateOTP = async (req, res) => {
     if (targetEmail) {
       try {
         const transporter = nodemailer.createTransport({
-          host: "smtp.gmail.com",
-          port: 587,
-          secure: false,
+          service: 'gmail',
           auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
           },
-          tls: {
-            rejectUnauthorized: false
-          },
-          dnsLookup: (hostname, options, callback) => {
-            return dns.lookup(hostname, { family: 4 }, callback);
-          }
-        });
+        })
 
         const mailOptions = {
           from: process.env.EMAIL_USER,
@@ -266,32 +247,26 @@ export const generateOTP = async (req, res) => {
         }
       } catch (emailError) {
         console.error('Nodemailer Error:', emailError.message)
-        res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-        res.header("Access-Control-Allow-Credentials", "true");
-        return res.status(400).json({ message: `Email sending failed via Nodemailer. Reason: ${emailError.message}. Check your .env EMAIL settings.` })
+        return res.status(400).json({ message: `Email sending failed: ${emailError.message}` })
       }
     } else {
-      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-      res.header("Access-Control-Allow-Credentials", "true");
-      return res.status(400).json({ message: 'Configuration error: Target email address resolution failed. Consignee email is missing or invalid.' })
+      return res.status(400).json({ message: 'Incorrect email' })
     }
 
     // Still keep the mock log for SMS if they use both, or just to show we got it
     console.log(`[MOCK LOG] OTP ${otp} generated for LR ${shipment.lrNumber}`)
 
-    // Final JSON response for success
     res.status(200).json({
       message: 'OTP generated and sent via Email successfully'
     })
   } catch (error) {
     console.error('Generate OTP Error:', error)
-
-    // Explicitly add CORS headers for error responses to bypass browser masking
-    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-    res.header("Access-Control-Allow-Credentials", "true");
-
     // Send specific message if we already set it
-    res.status(500).json({ message: `Severe Server Error during OTP generation: ${error.message}` })
+    if (error.message.includes('Incorrect email') || error.message.includes('Email sending failed')) {
+      res.status(400).json({ message: error.message })
+    } else {
+      res.status(500).json({ message: 'Failed to generate OTP' })
+    }
   }
 }
 
@@ -311,12 +286,11 @@ export const verifyDelivery = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to deliver this shipment' })
     }
 
+    // Local verification check
     console.log(`[OTP DEBUG] Verifying Entered OTP: ${otp} against Stored: ${shipment.deliveryOTP}`)
     if (!shipment.deliveryOTP || shipment.deliveryOTP.toString().trim() !== otp.toString().trim()) {
-      res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-      res.header("Access-Control-Allow-Credentials", "true");
       return res.status(400).json({
-        message: `OTP Verification Failed. System expected a different code. Please resend a new OTP.`
+        message: `Invalid OTP. System received: '${otp}'. Please check and try again.`
       })
     }
 
@@ -332,21 +306,19 @@ export const verifyDelivery = async (req, res) => {
     // Update shipment status to Delivered
     shipment.status = 'Delivered'
     shipment.deliveryLocation = location
-    shipment.deliveryTimestamp = new Date()
+    shipment.deliveryTimestamp = new Date() // Set verification time
+    // Clear the OTP fields
     shipment.deliveryOTP = undefined
     shipment.otpExpiry = undefined
 
     await shipment.save({ validateBeforeSave: false })
 
+    // --- Forward to ML Backend (Agent 2) skipped as per user request ---
+
     res.status(200).json({ message: 'Delivery verified and completed successfully!', shipment })
   } catch (error) {
     console.error('Verify Delivery Error:', error)
-
-    // Explicitly add CORS headers for error responses
-    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-    res.header("Access-Control-Allow-Credentials", "true");
-
-    res.status(500).json({ message: `Failed to verify delivery: ${error.message}` })
+    res.status(500).json({ message: 'Failed to verify delivery' })
   }
 }
 
@@ -429,7 +401,7 @@ export const requestInvoice = async (req, res) => {
     // Fraud Detection (Agent-3) - Enhanced Verification
     const requestedTotal = shipment.totalCarrierPayment
     const expectedTotal = shipment.totalCharges || 0
-
+    
     try {
       const unifiedMlUrl = process.env.UNIFIED_ML_URL || 'https://agent1-avv1.onrender.com'
       const fraudResponse = await axios.post(`${unifiedMlUrl}/agent3/api/detect-fraud`, {
@@ -441,12 +413,12 @@ export const requestInvoice = async (req, res) => {
         toll_amount: shipment.tollAmount,
         fuel_amount: shipment.fuelAmount
       })
-
+      
       const { risk_level, fraud_probability, reasons } = fraudResponse.data
       shipment.riskLevel = risk_level
       shipment.fraudProbability = fraud_probability
       shipment.fraudReasons = reasons
-
+      
       console.log(`[FRAUD DEBUG] Agent 3 Response: Risk=${risk_level}, Prob=${fraud_probability}%`)
     } catch (fraudError) {
       console.error('[FRAUD DEBUG] Agent 3 call failed:', fraudError.message)
