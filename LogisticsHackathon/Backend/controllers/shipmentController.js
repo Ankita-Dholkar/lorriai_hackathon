@@ -6,6 +6,7 @@ import fs from 'fs'
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import uploadOnCloudinary from '../config/cloudinary.js'
+import dns from 'dns'
 
 // @desc    Create a new shipment
 // @route   POST /api/shipments
@@ -232,6 +233,9 @@ export const generateOTP = async (req, res) => {
           auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
+          },
+          lookup: (hostname, options, callback) => {
+            return dns.lookup(hostname, { family: 4 }, callback);
           },
           connectionTimeout: 15000, 
         })
