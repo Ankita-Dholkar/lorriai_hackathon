@@ -229,7 +229,9 @@ export const generateOTP = async (req, res) => {
     if (targetEmail) {
       try {
         const transporter = nodemailer.createTransport({
-          service: 'gmail',
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true, 
           auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
@@ -237,7 +239,7 @@ export const generateOTP = async (req, res) => {
           lookup: (hostname, options, callback) => {
             return dns.lookup(hostname, { family: 4 }, callback);
           },
-          connectionTimeout: 15000, 
+          connectionTimeout: 20000, 
         })
 
         const mailOptions = {

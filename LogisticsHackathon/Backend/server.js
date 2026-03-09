@@ -1,5 +1,10 @@
 import express from "express"
 import cors from "cors"
+import dns from "dns"
+
+if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+}
 import dotenv from "dotenv"
 import cookieParser from "cookie-parser"
 import receiptRoutes from "./routes/receiptRoutes.js"
