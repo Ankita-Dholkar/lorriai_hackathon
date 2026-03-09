@@ -7,9 +7,12 @@ import sys
 
 # --- Adjust Python Path so imports work for the sub-projects ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "logistics_project"))
 sys.path.append(os.path.join(BASE_DIR, "agent2_delivery_verification"))
 sys.path.append(os.path.join(BASE_DIR, "agent3", "src"))
+
 
 # --- Import the applications ---
 # 1. Agent 2 (FastAPI) - Delivery Verification
@@ -19,7 +22,7 @@ from agent2_delivery_verification.main import app as agent2_app
 from logistics_project.app import app as agent1_flask_app
 
 # 3. Agent 3 (Flask) - Fraud Detection
-from server import app as agent3_flask_app  # Assuming 'server.py' is in 'agent 3/src'
+from agent3.src.server import app as agent3_flask_app  # Assuming 'server.py' is in 'agent 3/src'
 
 
 # --- Create Unified Master App ---
