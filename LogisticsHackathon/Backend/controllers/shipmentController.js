@@ -122,7 +122,7 @@ export const extractReceipt = async (req, res) => {
     formData.append('file', fs.createReadStream(req.file.path), req.file.originalname)
 
     // Send file to Python API
-    const pythonOcrUrl = process.env.PYTHON_OCR_URL || 'http://127.0.0.1:5000'
+    const pythonOcrUrl = process.env.PYTHON_OCR_URL || 'https://agent1-avv1.onrender.com'
     const pythonResponse = await axios.post(`${pythonOcrUrl}/api/extract`, formData, {
       headers: {
         ...formData.getHeaders()
