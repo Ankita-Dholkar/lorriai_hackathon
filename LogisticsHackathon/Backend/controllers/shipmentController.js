@@ -206,7 +206,7 @@ export const generateOTP = async (req, res) => {
 
     // Auto-fix common typo if '@' is missing before 'gmail.com'
     if (!emailToUse.includes('@') && emailToUse.toLowerCase().includes('gmail.com')) {
-       emailToUse = emailToUse.replace(/gmail\.com/i, '@gmail.com')
+      emailToUse = emailToUse.replace(/gmail\.com/i, '@gmail.com')
     }
     shipment.consigneeEmail = emailToUse
 
@@ -229,17 +229,20 @@ export const generateOTP = async (req, res) => {
     if (targetEmail) {
       try {
         const transporter = nodemailer.createTransport({
-          host: 'smtp.gmail.com',
-          port: 465,
-          secure: true, 
+          host: "smtp.gmail.com",
+          port: 587,
+          secure: false,
           auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
           },
-          family: 4, // Force IPv4 to avoid ENETUNREACH on Render
-          connectionTimeout: 30000, // 30 seconds
-          greetingTimeout: 20000,
-        })
+          tls: {
+            rejectUnauthorized: false
+          },
+          dnsLookup: (hostname, options, callback) => {
+            return dns.lookup(hostname, { family: 4 }, callback);
+          }
+        });
 
         const mailOptions = {
           from: process.env.EMAIL_USER,
@@ -282,7 +285,7 @@ export const generateOTP = async (req, res) => {
     })
   } catch (error) {
     console.error('Generate OTP Error:', error)
-    
+
     // Explicitly add CORS headers for error responses to bypass browser masking
     res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
     res.header("Access-Control-Allow-Credentials", "true");
@@ -338,7 +341,7 @@ export const verifyDelivery = async (req, res) => {
     res.status(200).json({ message: 'Delivery verified and completed successfully!', shipment })
   } catch (error) {
     console.error('Verify Delivery Error:', error)
-    
+
     // Explicitly add CORS headers for error responses
     res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
     res.header("Access-Control-Allow-Credentials", "true");
@@ -426,7 +429,7 @@ export const requestInvoice = async (req, res) => {
     // Fraud Detection (Agent-3) - Enhanced Verification
     const requestedTotal = shipment.totalCarrierPayment
     const expectedTotal = shipment.totalCharges || 0
-    
+
     try {
       const unifiedMlUrl = process.env.UNIFIED_ML_URL || 'https://agent1-avv1.onrender.com'
       const fraudResponse = await axios.post(`${unifiedMlUrl}/agent3/api/detect-fraud`, {
@@ -438,12 +441,12 @@ export const requestInvoice = async (req, res) => {
         toll_amount: shipment.tollAmount,
         fuel_amount: shipment.fuelAmount
       })
-      
+
       const { risk_level, fraud_probability, reasons } = fraudResponse.data
       shipment.riskLevel = risk_level
       shipment.fraudProbability = fraud_probability
       shipment.fraudReasons = reasons
-      
+
       console.log(`[FRAUD DEBUG] Agent 3 Response: Risk=${risk_level}, Prob=${fraud_probability}%`)
     } catch (fraudError) {
       console.error('[FRAUD DEBUG] Agent 3 call failed:', fraudError.message)
