@@ -183,8 +183,7 @@ export const generateOTP = async (req, res) => {
       shipment.consigneeContact = `+91${shipment.consigneeContact.trim()}`
     }
 
-    if (receiverEmail) {
-      // Relaxed validation: just check if it's not empty or very basic check
+    if (receiverEmail && receiverEmail.trim().length > 0) {
       if (receiverEmail.length < 5) {
         return res.status(400).json({ message: 'Incorrect email' })
       }
@@ -194,10 +193,8 @@ export const generateOTP = async (req, res) => {
          fixedEmail = fixedEmail.replace(/gmail\.com/i, '@gmail.com')
       }
       shipment.consigneeEmail = fixedEmail
-    } else if (shipment.consigneeEmail) {
-      if (shipment.consigneeEmail.length < 5) {
-        return res.status(400).json({ message: 'Incorrect email' })
-      }
+    } else if (shipment.consigneeEmail && shipment.consigneeEmail.trim().length >= 5) {
+      // Use existing email
     } else {
       return res.status(400).json({ message: 'Email is required for OTP' })
     }
