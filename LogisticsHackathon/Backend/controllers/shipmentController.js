@@ -236,10 +236,9 @@ export const generateOTP = async (req, res) => {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
           },
-          lookup: (hostname, options, callback) => {
-            return dns.lookup(hostname, { family: 4 }, callback);
-          },
-          connectionTimeout: 20000, 
+          family: 4, // Force IPv4 to avoid ENETUNREACH on Render
+          connectionTimeout: 30000, // 30 seconds
+          greetingTimeout: 20000,
         })
 
         const mailOptions = {
