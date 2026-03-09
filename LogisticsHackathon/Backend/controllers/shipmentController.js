@@ -101,10 +101,20 @@ export const getShipments = async (req, res) => {
 // @access  Private
 export const getCarriers = async (req, res) => {
   try {
-    const carriers = await User.find({ role: 'carrier' }).select('_id fullName companyName email mobile')
-    res.json(carriers)
+    console.log('[DEBUG] Fetching carriers...')
+    // Use regex for case-insensitive role match just in case
+    const carriers = await User.find({ 
+      role: { $regex: /^carrier$/i } 
+    }).select('_id fullName companyName email mobile role')
+    
+    console.log(`[DEBUG] Found ${carriers.length} carriers`)
+    if (carriers.length > 0) {
+      console.log(`[DEBUG] Carrier sample:`, carriers[0])
+    }
+    
+    res.status(200).json(carriers)
   } catch (error) {
-    console.error('Get Carriers Error:', error.message)
+    console.error('[DEBUG] getCarriers Error:', error.message)
     res.status(500).json({ message: 'Failed to fetch carriers' })
   }
 }

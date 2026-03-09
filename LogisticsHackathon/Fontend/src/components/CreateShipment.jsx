@@ -50,6 +50,7 @@ const CreateShipment = ({ user, onBack }) => {
         setCarriers(res.data)
       } catch (err) {
         console.error('Failed to fetch carriers:', err)
+        toast.error('Could not load carriers. Please refresh.')
       }
     }
     fetchCarriers()
