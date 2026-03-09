@@ -5,8 +5,8 @@ import uuid
 import traceback
 
 # Import local modules
-from models.image_ocr import extract_from_image
-from database.db import insert_data
+from .models.image_ocr import extract_from_image
+from .database.db import insert_data
 
 app = Flask(__name__)
 CORS(app)

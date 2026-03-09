@@ -2,14 +2,14 @@ import os
 import re
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from otp_service import generate_otp, verify_otp
-from gps_service import verify_gps
-from database import store_pod, store_manual_charges
-from receipt_verification import extract_receipt_data
-from receipt_verification import extract_receipt_data, extract_transaction_id
-from database import check_and_store_receipt
-from database import generate_invoice
-from database import calculate_carrier_payment
+from .otp_service import generate_otp, verify_otp
+from .gps_service import verify_gps
+from .database import store_pod, store_manual_charges
+from .receipt_verification import extract_receipt_data
+from .receipt_verification import extract_receipt_data, extract_transaction_id
+from .database import check_and_store_receipt
+from .database import generate_invoice
+from .database import calculate_carrier_payment
 
 # Create uploads folder automatically if not present
 os.makedirs("uploads", exist_ok=True)
