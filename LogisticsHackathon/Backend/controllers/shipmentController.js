@@ -214,8 +214,11 @@ export const generateOTP = async (req, res) => {
       console.log(`[OTP DEBUG] Generated OTP: ${otp} for LR: ${shipment.lrNumber}`)
     } catch (agentError) {
       console.error('Agent 2 OTP generation call failed:', agentError.message)
-      if (agentError.response) console.error('Agent 2 Response:', agentError.response.data)
-      throw new Error(`Agent 2 (ML) service unreachable or failed: ${agentError.message}`)
+      if (agentError.response) {
+        console.error('Agent 2 Response:', agentError.response.data)
+        throw new Error(`Agent 2 (ML) service reported error: ${JSON.stringify(agentError.response.data)}`)
+      }
+      throw new Error(`Agent 2 (ML) service unreachable: ${agentError.message}`)
     }
 
     // Set expiry to 10 minutes from now
@@ -262,10 +265,10 @@ export const generateOTP = async (req, res) => {
         }
       } catch (emailError) {
         console.error('Nodemailer Error:', emailError.message)
-        return res.status(400).json({ message: 'Incorrect email' })
+        return res.status(400).json({ message: `Email sending failed: ${emailError.message}` })
       }
     } else {
-      return res.status(400).json({ message: 'Incorrect email' })
+      return res.status(400).json({ message: `Email address missing or invalid for verification` })
     }
 
     // Still keep the mock log for SMS if they use both, or just to show we got it
@@ -277,10 +280,13 @@ export const generateOTP = async (req, res) => {
   } catch (error) {
     console.error('Generate OTP Error:', error)
     // Send specific message if we already set it
-    if (error.message.includes('Incorrect email')) {
-      res.status(400).json({ message: 'Incorrect email' })
+    const specificErrors = ['Incorrect email', 'Email is required', 'Email sending failed', 'Agent 2 (ML) service']
+    const foundError = specificErrors.find(se => error.message.includes(se))
+    
+    if (foundError) {
+      res.status(400).json({ message: error.message })
     } else {
-      res.status(500).json({ message: 'Failed to generate OTP' })
+      res.status(500).json({ message: `Failed to generate OTP: ${error.message}` })
     }
   }
 }
