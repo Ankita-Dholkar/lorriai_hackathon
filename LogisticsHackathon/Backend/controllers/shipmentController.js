@@ -121,9 +121,9 @@ export const extractReceipt = async (req, res) => {
     const formData = new FormData()
     formData.append('file', fs.createReadStream(req.file.path), req.file.originalname)
 
-    // Send file to Python API
-    const pythonOcrUrl = process.env.PYTHON_OCR_URL || 'https://agent1-avv1.onrender.com'
-    const pythonResponse = await axios.post(`${pythonOcrUrl}/api/extract`, formData, {
+    // Send file to Python API (Agent 1)
+    const unifiedMlUrl = process.env.UNIFIED_ML_URL || 'https://agent1-avv1.onrender.com'
+    const pythonResponse = await axios.post(`${unifiedMlUrl}/agent1/api/extract`, formData, {
       headers: {
         ...formData.getHeaders()
       }
@@ -211,8 +211,8 @@ export const generateOTP = async (req, res) => {
 
     let otp;
     try {
-      const agent2Url = process.env.AGENT2_URL || 'http://127.0.0.1:8001'
-      const agentResponse = await axios.post(`${agent2Url}/generate-otp?lr_number=${encodeURIComponent(shipment.lrNumber)}&receiver_contact=${encodeURIComponent(shipment.consigneeContact)}`, {})
+      const unifiedMlUrl = process.env.UNIFIED_ML_URL || 'https://agent1-avv1.onrender.com'
+      const agentResponse = await axios.post(`${unifiedMlUrl}/agent2/generate-otp?lr_number=${encodeURIComponent(shipment.lrNumber)}&receiver_contact=${encodeURIComponent(shipment.consigneeContact)}`, {})
       otp = agentResponse.data.generated_otp.toString()
       console.log(`[OTP DEBUG] Generated OTP: ${otp} for LR: ${shipment.lrNumber}`)
     } catch (agentError) {
@@ -308,8 +308,8 @@ export const verifyDelivery = async (req, res) => {
     let agentVerified = false
     console.log(`[OTP DEBUG] Verifying Entered OTP: ${otp} (Type: ${typeof otp}) for LR: ${shipment.lrNumber}`)
     try {
-      const agent2Url = process.env.AGENT2_URL || 'http://127.0.0.1:8001'
-      const agentVerifyRes = await axios.post(`${agent2Url}/verify-otp?lr_number=${encodeURIComponent(shipment.lrNumber)}&entered_otp=${otp}`, {})
+      const unifiedMlUrl = process.env.UNIFIED_ML_URL || 'https://agent1-avv1.onrender.com'
+      const agentVerifyRes = await axios.post(`${unifiedMlUrl}/agent2/verify-otp?lr_number=${encodeURIComponent(shipment.lrNumber)}&entered_otp=${otp}`, {})
       console.log(`[OTP DEBUG] Agent 2 Response:`, agentVerifyRes.data)
       if (agentVerifyRes.data.delivery_verification === 'SUCCESS') {
         agentVerified = true
@@ -362,8 +362,8 @@ const performExtraction = async (filePath, type) => {
   try {
     const formData = new FormData()
     formData.append('file', fs.createReadStream(filePath))
-    const agent3Url = process.env.AGENT3_URL || 'http://127.0.0.1:8002'
-    const url = `${agent3Url}/api/extract-${type}`
+    const unifiedMlUrl = process.env.UNIFIED_ML_URL || 'https://agent1-avv1.onrender.com'
+    const url = `${unifiedMlUrl}/agent3/api/extract-${type}`
     const response = await axios.post(url, formData, {
       headers: { ...formData.getHeaders() }
     })
@@ -438,8 +438,8 @@ export const requestInvoice = async (req, res) => {
     const expectedTotal = shipment.totalCharges || 0
     
     try {
-      const agent3Url = process.env.AGENT3_URL || 'http://127.0.0.1:8002'
-      const fraudResponse = await axios.post(`${agent3Url}/api/detect-fraud`, {
+      const unifiedMlUrl = process.env.UNIFIED_ML_URL || 'https://agent1-avv1.onrender.com'
+      const fraudResponse = await axios.post(`${unifiedMlUrl}/agent3/api/detect-fraud`, {
         requested_total: requestedTotal,
         expected_total: expectedTotal,
         waiting_charges: shipment.waitingCharges,
